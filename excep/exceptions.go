@@ -11,80 +11,55 @@ type goexcep struct {
 	errmsg string
 }
 
+// NewGoexcep - create an exception object
 func NewGoexcep() *goexcep {
 	return &goexcep{e: make(chan int), excep: false, errmsg: ""}
 }
 
-func (g *goexcep) try(f func()) {
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				// we are recovering from a panic
-				fmt.Println("Recovered in f", r)
-				if err, ok := r.(error); ok {
-					g.errmsg = err.Error()
-				} else {
-					g.errmsg = fmt.Sprintf("%v", r)
-				}
-				g.excep = true
-				g.e <- 1
-			}
-		}()
-		f()
-		g.excep = false
-		g.e <- 1
-	}()
-}
-
-func (g *goexcep) catch() error {
-	fmt.Println("Waiting to catch...")
-	select {
-	case <-g.e:
-		if g.excep == true {
-			fmt.Println("Caught")
-			return errors.New(g.errmsg)
-		}
-	}
-	return nil
-}
-
+// Throw - Throws an exception
 func Throw(msg string) {
 	panic(fmt.Sprintf("%v", msg))
 }
 
+// TryAndCatch - performs a try and returns error when exception is caught 
 func (g *goexcep) TryAndCatch(f func()) error {
 	g.try(f)
 	return g.catch()
 }
 
-/*
-package main
-
-import "fmt"
-
-func main() {
-    f()
-    fmt.Println("Returned normally from f.")
+// try - will try a function and recover from an exception if something
+// happens during its execution 
+func (g *goexcep) try(f func()) {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// we are recovering from a panic
+				fmt.Println("Exception Recovered:", r)
+				if err, ok := r.(error); ok {
+					g.errmsg = err.Error()
+				} else {
+					g.errmsg = fmt.Sprintf("%v", r)
+				}
+				// we exit with an exception - feed the exception channel
+				g.excep = true
+				g.e <- 1
+			}
+		}()
+		f()
+		// we exit without exception - feed the exception channel
+		g.excep = false
+		g.e <- 1
+	}()
 }
 
-func f() {
-    defer func() {
-        if r := recover(); r != nil {
-            fmt.Println("Recovered in f", r)
-        }
-    }()
-    fmt.Println("Calling g.")
-    g(0)
-    fmt.Println("Returned normally from g.")
+// catch - will listen to the exception channel waiting for an exception to
+// occur -or- the end of the normal execution 
+func (g *goexcep) catch() error {
+	<-g.e
+	if g.excep == true {
+		fmt.Println("Caught exception")
+		return errors.New(g.errmsg)
+	}
+	return nil
 }
 
-func g(i int) {
-    if i > 3 {
-        fmt.Println("Panicking!")
-        panic(fmt.Sprintf("%v", i))
-    }
-    defer fmt.Println("Defer in g", i)
-    fmt.Println("Printing in g", i)
-    g(i + 1)
-}
-*/
