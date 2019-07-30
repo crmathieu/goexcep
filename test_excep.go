@@ -8,7 +8,7 @@ import (
 // f1 will trigger a runtime error (division by 0)
 func f1() {
 	a, b := 1, 0
-	c := a/b
+	c := a / b
 	fmt.Println(c)
 }
 
@@ -38,4 +38,3 @@ func main() {
 	}
 
 }
-

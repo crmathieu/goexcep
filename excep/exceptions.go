@@ -1,22 +1,22 @@
 package goexcep
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 type goexcep struct {
-	e 		chan int
-	excep 	bool
-	errmsg 	string
+	e      chan int
+	excep  bool
+	errmsg string
 }
 
 func NewGoexcep() *goexcep {
 	return &goexcep{e: make(chan int), excep: false, errmsg: ""}
 }
 
-func (g *goexcep) try (f func()) {
-   go func() {
+func (g *goexcep) try(f func()) {
+	go func() {
 		defer func() {
 			if r := recover(); r != nil {
 				// we are recovering from a panic
@@ -28,21 +28,22 @@ func (g *goexcep) try (f func()) {
 				}
 				g.excep = true
 				g.e <- 1
-			} 
+			}
 		}()
 		f()
 		g.excep = false
 		g.e <- 1
-   }()		
+	}()
 }
 
-func (g *goexcep) catch () error {
+func (g *goexcep) catch() error {
 	fmt.Println("Waiting to catch...")
 	select {
-	case <- g.e: if g.excep == true {
-					fmt.Println("Caught")
-					return errors.New(g.errmsg)
-				 }
+	case <-g.e:
+		if g.excep == true {
+			fmt.Println("Caught")
+			return errors.New(g.errmsg)
+		}
 	}
 	return nil
 }
@@ -51,11 +52,10 @@ func Throw(msg string) {
 	panic(fmt.Sprintf("%v", msg))
 }
 
-func (g *goexcep) TryAndCatch (f func()) error {
+func (g *goexcep) TryAndCatch(f func()) error {
 	g.try(f)
 	return g.catch()
 }
-
 
 /*
 package main
