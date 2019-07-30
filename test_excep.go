@@ -12,9 +12,9 @@ func f1() {
 	fmt.Println(c)
 }
 
-// trigger a throw for a particular reason
+// f2 will trigger a throw for a particular reason
 func f2() {
-	goe.Throw("something triggering a throw")
+	goe.Throw("let's throw an exception")
 }
 
 // nothing happened
