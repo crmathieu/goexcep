@@ -173,8 +173,8 @@ func nestedProblems() {
     var e2 = goe.NewGoexcep()
     if err := e2.TryAndCatch(letitthrow); err != nil {
         // catch code
-		fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n",err.Error())
-		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", err.Error()))
+        fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n",err.Error())
+        goe.Throw(fmt.Sprintf("Re-Throwning (%v)", err.Error()))
     }	
 }
 ```
@@ -209,8 +209,6 @@ func main() {
         // catch code
         fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
     }
-
-    time.Sleep(5)
 }
 ```
 
