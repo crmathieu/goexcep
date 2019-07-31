@@ -118,17 +118,17 @@ func (g *goexcep) try(f func()) {
 ```
 
 ## API
-### Try and catch exception generated in function _f_
+#### Try and catch exception generated in function _f_
 ```go
 func (g *goexcep) TryAndCatch(f func()) error 
 ```
 
-### Create an exception object
+#### Create an exception object
 ```go
 func NewGoexcep() *goexcep
 ```
 
-### Throw an exception
+#### Throw an exception
 ```go
 func Throw(msg string) 
 ```
@@ -136,7 +136,8 @@ func Throw(msg string)
 ## Examples
 The following illustrates the capture of different type of exceptions (runtime, code generated) as well as an example of nested exceptions
 
-Triggers a runtime error (division by 0)
+
+#### Triggers a runtime error (division by 0)
 ```go
 func runtime() {
 	a, b := 1, 0
@@ -144,14 +145,15 @@ func runtime() {
 	fmt.Println(c)
 }
 ```
-Triggers a throw for a particular reason
+
+#### Triggers a throw for a particular reason
 ```go
 func letitthrow() {
 	goe.Throw("let's throw an exception")
 }
 ```
 
-Nicely behaving function
+#### Nicely behaving function
 ```go
 func goodboy() {
 	fmt.Println("It's all good...")
@@ -190,7 +192,7 @@ func main() {
 }
 ```
 
-The ebaove code returns the following messages
+The ebove code returns the following messages
 
 ```text
 Recovering from runtime error: integer divide by zero
