@@ -214,7 +214,7 @@ func withSubroutine() {
 ```
 **withSubroutine** will generate 2 exceptions: one during the execution of the _divByZero_ function and one inside the goroutine originating from the _segViolation_ function.
 
-#### when putting everything together
+#### putting everything together
 ```go
 func main() {
     e := goe.NewGoexcep()
