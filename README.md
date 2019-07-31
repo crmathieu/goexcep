@@ -136,47 +136,45 @@ func Throw(msg string)
 ## Example
 The following illustrates the capture of different type of exceptions (runtime, code generated) as well as an example of nested exceptions
 
-
 #### runtime error (division by 0)
 ```go
 func runtime() {
-	a, b := 1, 0
-	c := a / b
-	fmt.Println(c)
+    a, b := 1, 0
+    c := a / b
+    fmt.Println(c)
 }
 ```
 
 #### exception thrown
 ```go
 func letitthrow() {
-	goe.Throw("let's throw an exception")
+    goe.Throw("let's throw an exception")
 }
 ```
 
 #### Nicely behaving function
 ```go
 func goodboy() {
-	fmt.Println("It's all good...")
+    fmt.Println("It's all good...")
 }
 ```
 #### runtime error (memory violation)
 ```go
 func segViolation() {
-	var p *int
-	*p = 1
+    var p *int
+    *p = 1
 }
 ```
 
 #### Nested exception
 ```go
 func nestedProblems() {
-	var e2 = goe.NewGoexcep()
-	if err := e2.TryAndCatch(letitthrow); err != nil {
-		// catch code
-		fmt.Println("Caught from inner try catch:",err.Error())
-		goe.Throw(fmt.Sprintf("Re-Throwning %v", err.Error()))
-	}
-	
+    var e2 = goe.NewGoexcep()
+    if err := e2.TryAndCatch(letitthrow); err != nil {
+        // catch code
+        fmt.Println("Caught from inner try catch:",err.Error())
+        goe.Throw(fmt.Sprintf("Re-Throwning %v", err.Error()))
+    }	
 }
 ```
 
