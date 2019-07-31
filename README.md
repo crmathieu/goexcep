@@ -40,8 +40,8 @@ func c() (i int) {
 Having said that, we are going to define an _exception_ object as:
 ```go
 type goexcep struct {
-	e      chan int
-	errmsg string
+    e      chan int
+    errmsg string
 }
 ```
 Where
