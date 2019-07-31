@@ -46,7 +46,7 @@ type goexcep struct {
 }
 ```
 
-- The channel **e** is used to synchronize the _try_ and _catch_ method. 
+- The channel **e** is used to synchronize the _try_ and _catch_ private methods. 
 - The boolean **excep** is used to specify whether an exception occured or not.
 - The string **errmsg** is used to hold the error message corresponding to the exception.
 

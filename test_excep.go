@@ -5,30 +5,32 @@ import (
 	goe "github.com/crmathieu/goexcep/excep"
 )
 
-// f1 will trigger a runtime error (division by 0)
+// triggers a runtime error (division by 0)
 func runtime() {
 	a, b := 1, 0
 	c := a / b
 	fmt.Println(c)
 }
 
-// f2 will trigger a throw for a particular reason
+// triggers a throw for a particular reason
 func letitthrow() {
 	goe.Throw("let's throw an exception")
 }
 
-// nothing happened
+// nicely behaving function
 func goodboy() {
 	fmt.Println("It's all good...")
 }
 
-func complexStuff() {
+// nested exception
+func nestedProblems() {
 	var e2 = goe.NewGoexcep()
 	if err := e2.TryAndCatch(letitthrow); err != nil {
 		// catch code
-		fmt.Println("Caught:",err.Error())
+		fmt.Println("Caught from inner try catch:",err.Error())
+		goe.Throw(fmt.Sprintf("Re-Throwning %v", err.Error()))
 	}
-	goe.Throw("Thrown from ComplexStuff")
+	
 }
 
 func main() {
@@ -41,12 +43,8 @@ func main() {
 		// catch code
 		fmt.Println("Caught:",err.Error())
 	}
-	if err := e.TryAndCatch(letitthrow); err != nil {
-		// catch code
-		fmt.Println("Caught:",err.Error())
-	}
 
-	if err := e.TryAndCatch(complexStuff); err != nil {
+	if err := e.TryAndCatch(nestedProblems); err != nil {
 		// catch code
 		fmt.Println("Caught:",err.Error())
 	}
