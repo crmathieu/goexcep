@@ -210,7 +210,7 @@ func withSubroutine() {
 ```
 **withSubroutine** will generate 2 exceptions: one during the execution of the _divByZero_ function and one inside the goroutine originating from the _segViolation_ function.
 
-#### let's put everything together
+#### when putting everything together
 ```go
 func main() {
     e := goe.NewGoexcep()
@@ -237,7 +237,7 @@ func main() {
 }
 ```
 
-#### The ebove code returns the following messages
+#### The above code returns the following messages
 ```text
 Recovering from (runtime error: integer divide by zero)
 Caught in 'withSubroutine' (runtime error: integer divide by zero)
