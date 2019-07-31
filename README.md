@@ -74,10 +74,10 @@ A private _catch_ method waits for the exception channel to be unblocked. This i
 
 ```go
 func (g *goexcep) catch() error {
-	<-g.e
-	if g.excep == true {
-		return errors.New(g.errmsg)
-	}
+    <-g.e
+    if g.excep == true {
+        return errors.New(g.errmsg)
+    }
     return nil
 }
 ```
@@ -86,34 +86,34 @@ _catch_ returns an error that is nil when there was no exception.
 The API function **TryAndCatch** calls the _try_ and _catch_ methods and returns an error.
 ```go
 func (g *goexcep) TryAndCatch(f func()) error {
-	g.try(f)
-	return g.catch()
+    g.try(f)
+    return g.catch()
 }
 ```
 
 To make this work, the function _f_ in the _try_ method must be ran as a separate go routine, hence the final code of _try_:
 ```go
 func (g *goexcep) try(f func()) {
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				// we are recovering from a panic
-				fmt.Println("Recovering from", r)
-				if err, ok := r.(error); ok {
-					g.errmsg = err.Error()
-				} else {
-					g.errmsg = fmt.Sprintf("%v", r)
-				}
-				// we exit with an exception - feed the exception channel
-				g.excep = true
-				g.e <- 1
-			}
-		}()
-		f()
-		// we exit without exception - feed the exception channel
-		g.excep = false
-		g.e <- 1
-	}()
+    go func() {
+        defer func() {
+            if r := recover(); r != nil {
+                // we are recovering from a panic
+                fmt.Println("Recovering from", r)
+                if err, ok := r.(error); ok {
+                g.errmsg = err.Error()
+            } else {
+                g.errmsg = fmt.Sprintf("%v", r)
+            }
+            // we exit with an exception - feed the exception channel
+            g.excep = true
+            g.e <- 1
+        }
+        }()
+        f()
+        // we exit without exception - feed the exception channel
+        g.excep = false
+        g.e <- 1
+    }()
 }
 ```
 
