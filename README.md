@@ -1,6 +1,15 @@
 # goexcep
 exception in Go for the nostalgic
 
+## Installation
+Run ```go get https://github.com/crmathieu/goexcep``` and import the package at the beginning of your code:
+```go
+import (
+    goe "github.com/crmathieu/goexcep/excep"
+)
+```
+
+## Introduction
 Go does not have exceptions. Go allows functions to return an error type in addition to a result via its support for multiple return values. By declaring an error return value you indicate to the caller that this method could go wrong. If a function returns a value and an error, then you can’t assume anything about the value until you’ve inspected the error. 
 
 Now, let's examine a few go functionalities that we will be using in our exception implementation:
