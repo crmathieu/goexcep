@@ -138,7 +138,7 @@ The following illustrates the capture of different type of exceptions (runtime, 
 
 #### runtime error (division by 0)
 ```go
-func runtime() {
+func divByZero() {
     a, b := 1, 0
     c := a / b
     fmt.Println(c)
@@ -182,7 +182,7 @@ func nestedProblems() {
 ```go
 func main() {
     e := goe.NewGoexcep()
-    if err := e.TryAndCatch(runtime); err != nil {
+    if err := e.TryAndCatch(divByZero); err != nil {
         // catch code
         fmt.Printf("Caught (%v)\n",err.Error())
     }

@@ -6,7 +6,7 @@ import (
 )
 
 // runtime error (division by 0)
-func runtime() {
+func divByZero() {
 	a, b := 1, 0
 	c := a / b
 	fmt.Println(c)
@@ -33,30 +33,28 @@ func nestedProblems() {
 	var e2 = goe.NewGoexcep()
 	if err := e2.TryAndCatch(letitthrow); err != nil {
 		// catch code
-		fmt.Printf("Caught from inner try catch (%v)\n", err.Error())
+		fmt.Printf("Caught from inner try catch (%v)\n",err.Error())
 		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", err.Error()))
 	}
-
+	
 }
 
 func main() {
 	e := goe.NewGoexcep()
-	if err := e.TryAndCatch(runtime); err != nil {
+	if err := e.TryAndCatch(divByZero); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n", err.Error())
+		fmt.Printf("Caught (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(goodboy); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n", err.Error())
+		fmt.Printf("Caught (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(segViolation); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n", err.Error())
+		fmt.Printf("Caught (%v)\n",err.Error())
 	}
-
 	if err := e.TryAndCatch(nestedProblems); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n", err.Error())
+		fmt.Printf("Caught (%v)\n",err.Error())
 	}
-
 }
