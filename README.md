@@ -118,14 +118,14 @@ func (g *goexcep) try(f func()) {
 ```
 
 ## API
-// try and catch exception generated in function _f_
-func (g *goexcep) TryAndCatch(f func()) error 
+Try and catch exception generated in function _f_
+### func (g *goexcep) TryAndCatch(f func()) error 
 
-// creates an exception object
-func NewGoexcep() *goexcep
+Create an exception object
+### func NewGoexcep() *goexcep
 
-// Throw - Throws an exception
-func Throw(msg string) 
+Throw an exception
+### func Throw(msg string) 
 
 
 ## Examples
