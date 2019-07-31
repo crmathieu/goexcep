@@ -1,5 +1,5 @@
 # goexcep
-exception in Go for the nostalgic
+exception in Go for the nostalgic.
 
 ## Installation
 Run ```go get https://github.com/crmathieu/goexcep``` and import the package at the beginning of your code:
@@ -10,7 +10,10 @@ import (
 ```
 
 ## Introduction
-Go does not have exceptions. Go allows functions to return an error type in addition to a result via its support for multiple return values. By declaring an error return value you indicate to the caller that this method could go wrong. If a function returns a value and an error, then you can’t assume anything about the value until you’ve inspected the error. 
+For those developers used to work in C++, Java, PHP, Python etc... it might be a little hard to realize that Go does not have exceptions. But there are ways where we can sort of simulate the type of exception handling known in other languages.
+ 
+
+Go allows functions to return an error type in addition to a result via its support for multiple return values. By declaring an error return value you indicate to the caller that this method could go wrong. If a function returns a value and an error, then you can’t assume anything about the value until you’ve inspected the error. 
 
 Now, let's examine a few go functionalities that we will be using in our exception implementation:
 
@@ -260,6 +263,6 @@ Recovering from (Re-Throwning (let's throw an exception))
 Caught in 'nestedProblems' (Re-Throwning (let's throw an exception))
 ```
 
-Because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the goroutine. This, in turns, triggers a call to the deferred function which captures _panic_ using the _recover_ function.
+Because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the TryAndCatch code. This, in turns, triggers a call to the deferred function which captures _panic_ using the _recover_ function.
 
 For that reason, we can see for example that in the **deeper** function, the instruction to display the message **end** never gets a chance to be executed simply because when the runtime error happens within the **indexRange** function, it bubbles up to the **deeper** function body and since there is no differed block with recovery yet, it continues on bubbling up the call stack. Hence any code following the function call where an error originated is ignored.  
