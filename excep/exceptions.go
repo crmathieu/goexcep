@@ -21,20 +21,20 @@ func Throw(msg string) {
 	panic(fmt.Sprintf("%v", msg))
 }
 
-// TryAndCatch - performs a try and returns error when exception is caught 
+// TryAndCatch - performs a try and returns error when exception is caught
 func (g *goexcep) TryAndCatch(f func()) error {
 	g.try(f)
 	return g.catch()
 }
 
 // try - will try a function and recover from an exception if something
-// happens during its execution 
+// happens during its execution
 func (g *goexcep) try(f func()) {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
 				// we are recovering from a panic
-				fmt.Println("Recovering from", r)
+				fmt.Printf("Recovering from (%v)\n", r)
 				if err, ok := r.(error); ok {
 					g.errmsg = err.Error()
 				} else {
@@ -53,7 +53,7 @@ func (g *goexcep) try(f func()) {
 }
 
 // catch - will listen to the exception channel waiting for an exception to
-// occur -or- the end of the normal execution 
+// occur -or- the end of the normal execution
 func (g *goexcep) catch() error {
 	<-g.e
 	if g.excep == true {
@@ -61,4 +61,3 @@ func (g *goexcep) catch() error {
 	}
 	return nil
 }
-

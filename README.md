@@ -56,7 +56,7 @@ A private _try_ method takes a function as a parameter. This function correspond
     defer func() {
         if r := recover(); r != nil {
             // we are recovering from a panic
-            fmt.Println("Recovering from", r)
+            fmt.Printf("Recovering from (%v)\n", r)
             if err, ok := r.(error); ok {
                 g.errmsg = err.Error()
             } else {
@@ -98,7 +98,7 @@ func (g *goexcep) try(f func()) {
         defer func() {
             if r := recover(); r != nil {
                 // we are recovering from a panic
-                fmt.Println("Recovering from", r)
+                fmt.Printf("Recovering from (%v)\n", r)
                 if err, ok := r.(error); ok {
                     g.errmsg = err.Error()
                 } else {
@@ -137,7 +137,7 @@ func Throw(msg string)
 The following illustrates the capture of different type of exceptions (runtime, code generated) as well as an example of nested exceptions
 
 
-#### Triggers a runtime error (division by 0)
+#### runtime error (division by 0)
 ```go
 func runtime() {
 	a, b := 1, 0
@@ -146,7 +146,7 @@ func runtime() {
 }
 ```
 
-#### Triggers a throw for a particular reason
+#### exception thrown
 ```go
 func letitthrow() {
 	goe.Throw("let's throw an exception")
@@ -158,10 +158,16 @@ func letitthrow() {
 func goodboy() {
 	fmt.Println("It's all good...")
 }
-
+```
+#### runtime error (memory violation)
+```go
+func segViolation() {
+	var p *int
+	*p = 1
+}
 ```
 
-Nested exception
+#### Nested exception
 ```go
 func nestedProblems() {
 	var e2 = goe.NewGoexcep()
@@ -174,32 +180,39 @@ func nestedProblems() {
 }
 ```
 
+#### let's put everything together
 ```go
 func main() {
-	e := goe.NewGoexcep()
+    e := goe.NewGoexcep()
 	if err := e.TryAndCatch(runtime); err != nil {
 		// catch code
-		fmt.Println("Caught:",err.Error())
+		fmt.Printf("Caught (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(goodboy); err != nil {
 		// catch code
-		fmt.Println("Caught:",err.Error())
+		fmt.Printf("Caught (%v)\n",err.Error())
+	}
+	if err := e.TryAndCatch(segViolation); err != nil {
+		// catch code
+		fmt.Printf("Caught (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(nestedProblems); err != nil {
 		// catch code
-		fmt.Println("Caught:",err.Error())
+		fmt.Printf("Caught (%v)\n",err.Error())
 	}
 }
 ```
 
-The ebove code returns the following messages
+#### The ebove code returns the following messages
 
 ```text
-Recovering from runtime error: integer divide by zero
-Caught: runtime error: integer divide by zero
+Recovering from (runtime error: integer divide by zero)
+Caught (runtime error: integer divide by zero)
 It's all good...
-Recovering from let's throw an exception
-Caught from inner try catch: let's throw an exception
-Recovering from Re-Throwning let's throw an exception
-Caught: Re-Throwning let's throw an exception
+Recovering from (runtime error: invalid memory address or nil pointer dereference)
+Caught (runtime error: invalid memory address or nil pointer dereference)
+Recovering from (let's throw an exception)
+Caught from inner try catch (let's throw an exception)
+Recovering from (Re-Throwning (let's throw an exception))
+Caught (Re-Throwning (let's throw an exception))
 ```
