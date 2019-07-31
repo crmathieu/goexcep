@@ -214,26 +214,26 @@ func withSubroutine() {
 ```go
 func main() {
     e := goe.NewGoexcep()
-	if err := e.TryAndCatch(withSubroutine); err != nil {
-       // catch code
+    if err := e.TryAndCatch(withSubroutine); err != nil {
+        // catch code
         fmt.Printf("Caught in 'withSubroutine' (%v)\n",err.Error())
- 	}
-	if err := e.TryAndCatch(divByZero); err != nil {
-		// catch code
-		fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
-	}
-	if err := e.TryAndCatch(goodboy); err != nil {
-		// catch code
-		fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
-	}
-	if err := e.TryAndCatch(deeper); err != nil {
-		// catch code
-		fmt.Printf("Caught in 'deepger' (%v)\n",err.Error())
-	}
-	if err := e.TryAndCatch(nestedProblems); err != nil {
-		// catch code
-		fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
-	}
+    }
+    if err := e.TryAndCatch(divByZero); err != nil {
+        // catch code
+        fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
+    }
+    if err := e.TryAndCatch(goodboy); err != nil {
+        // catch code
+        fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
+    }
+    if err := e.TryAndCatch(deeper); err != nil {
+        // catch code
+        fmt.Printf("Caught in 'deepger' (%v)\n",err.Error())
+    }
+    if err := e.TryAndCatch(nestedProblems); err != nil {
+        // catch code
+        fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
+    }
 }
 ```
 
