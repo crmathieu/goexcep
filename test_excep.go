@@ -33,28 +33,35 @@ func nestedProblems() {
 	var e2 = goe.NewGoexcep()
 	if err := e2.TryAndCatch(letitthrow); err != nil {
 		// catch code
-		fmt.Printf("Caught from inner try catch (%v)\n",err.Error())
+		fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n",err.Error())
 		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", err.Error()))
 	}
-	
+}
+
+// longer func
+func longer() {
+	segViolation()
+
+	// then loop forever
+	for true {}
 }
 
 func main() {
 	e := goe.NewGoexcep()
 	if err := e.TryAndCatch(divByZero); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
+		fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(goodboy); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
+		fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
 	}
-	if err := e.TryAndCatch(segViolation); err != nil {
+	if err := e.TryAndCatch(longer); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
+		fmt.Printf("Caught in 'longer' (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(nestedProblems); err != nil {
 		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
+		fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
 	}
 }

@@ -158,6 +158,7 @@ func goodboy() {
     fmt.Println("It's all good...")
 }
 ```
+
 #### runtime error (memory violation)
 ```go
 func segViolation() {
@@ -172,9 +173,19 @@ func nestedProblems() {
     var e2 = goe.NewGoexcep()
     if err := e2.TryAndCatch(letitthrow); err != nil {
         // catch code
-        fmt.Println("Caught from inner try catch:",err.Error())
-        goe.Throw(fmt.Sprintf("Re-Throwning %v", err.Error()))
+		fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n",err.Error())
+		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", err.Error()))
     }	
+}
+```
+
+#### longer func
+```go
+func longer() {
+	segViolation()
+
+	// then loop forever
+	for true {}
 }
 ```
 
@@ -184,33 +195,32 @@ func main() {
     e := goe.NewGoexcep()
     if err := e.TryAndCatch(divByZero); err != nil {
         // catch code
-        fmt.Printf("Caught (%v)\n",err.Error())
+        fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
     }
     if err := e.TryAndCatch(goodboy); err != nil {
         // catch code
-        fmt.Printf("Caught (%v)\n",err.Error())
+        fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
     }
-    if err := e.TryAndCatch(segViolation); err != nil {
+    if err := e.TryAndCatch(longer); err != nil {
         // catch code
-        fmt.Printf("Caught (%v)\n",err.Error())
+        fmt.Printf("Caught in 'longer' (%v)\n",err.Error())
     }
     if err := e.TryAndCatch(nestedProblems); err != nil {
         // catch code
-        fmt.Printf("Caught (%v)\n",err.Error())
+        fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
     }
 }
 ```
 
 #### The ebove code returns the following messages
-
 ```text
 Recovering from (runtime error: integer divide by zero)
-Caught (runtime error: integer divide by zero)
+Caught in 'divByZero' (runtime error: integer divide by zero)
 It's all good...
 Recovering from (runtime error: invalid memory address or nil pointer dereference)
-Caught (runtime error: invalid memory address or nil pointer dereference)
+Caught in 'longer' (runtime error: invalid memory address or nil pointer dereference)
 Recovering from (let's throw an exception)
-Caught from inner try catch (let's throw an exception)
+Caught in 'letitthrow' from inner try catch (let's throw an exception)
 Recovering from (Re-Throwning (let's throw an exception))
-Caught (Re-Throwning (let's throw an exception))
+Caught in 'nestedProblems' (Re-Throwning (let's throw an exception))
 ```
