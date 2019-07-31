@@ -199,13 +199,13 @@ If your function creates go subroutines, each subroutine will operate on its own
 
 ```go
 func withSubroutine() {	
-	go func() {
-		var e2 = goe.NewGoexcep()
-		if err := e2.TryAndCatch(segViolation); err != nil {
-			fmt.Printf("Caught in goroutine 'segViolation' (%v)\n",err.Error())
-		}
-	}()
-	divByZero()
+    go func() {
+        var e2 = goe.NewGoexcep()
+        if err := e2.TryAndCatch(segViolation); err != nil {
+            fmt.Printf("Caught in goroutine 'segViolation' (%v)\n",err.Error())
+        }
+    }()
+    divByZero()
 }
 ```
 **withSubroutine** will generate 2 exceptions: one during the execution of the _divByZero_ function and one inside the goroutine originating from the _segViolation_ function.
