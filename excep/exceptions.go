@@ -34,7 +34,7 @@ func (g *goexcep) try(f func()) {
 		defer func() {
 			if r := recover(); r != nil {
 				// we are recovering from a panic
-				fmt.Println("Exception Recovered:", r)
+				fmt.Println("Recovering from", r)
 				if err, ok := r.(error); ok {
 					g.errmsg = err.Error()
 				} else {
@@ -57,7 +57,6 @@ func (g *goexcep) try(f func()) {
 func (g *goexcep) catch() error {
 	<-g.e
 	if g.excep == true {
-		fmt.Println("Caught exception")
 		return errors.New(g.errmsg)
 	}
 	return nil
