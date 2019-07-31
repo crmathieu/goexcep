@@ -184,22 +184,22 @@ func nestedProblems() {
 ```go
 func main() {
     e := goe.NewGoexcep()
-	if err := e.TryAndCatch(runtime); err != nil {
-		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
-	}
-	if err := e.TryAndCatch(goodboy); err != nil {
-		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
-	}
-	if err := e.TryAndCatch(segViolation); err != nil {
-		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
-	}
-	if err := e.TryAndCatch(nestedProblems); err != nil {
-		// catch code
-		fmt.Printf("Caught (%v)\n",err.Error())
-	}
+    if err := e.TryAndCatch(runtime); err != nil {
+        // catch code
+        fmt.Printf("Caught (%v)\n",err.Error())
+    }
+    if err := e.TryAndCatch(goodboy); err != nil {
+        // catch code
+        fmt.Printf("Caught (%v)\n",err.Error())
+    }
+    if err := e.TryAndCatch(segViolation); err != nil {
+        // catch code
+        fmt.Printf("Caught (%v)\n",err.Error())
+    }
+    if err := e.TryAndCatch(nestedProblems); err != nil {
+        // catch code
+        fmt.Printf("Caught (%v)\n",err.Error())
+    }
 }
 ```
 
