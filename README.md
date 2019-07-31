@@ -25,18 +25,32 @@ func b() {
     }
 }
 ```
-- Deferred functions may read and assign to the returning function's named return values.In this example, a deferred function increments the return value i after the surrounding function returns. Thus, this function returns i+1:
+- Deferred functions may read and assign to the returning function's named return values.In this example, a deferred function increments the return value i after the surrounding function returns. Thus, this function returns 2:
 ```go
 func c() (i int) {
     defer func() { i++ }()
-    return i
+    return 1
 }
 ```
 
-**Panic** is a built-in function that stops the ordinary flow of control and begins panicking. When the function F calls panic, execution of F stops, any deferred functions in F are executed normally, and then F returns to its caller. To the caller, F then behaves like a call to panic. The process continues up the stack until all functions in the current goroutine have returned, at which point the program crashes. Panics can be initiated by invoking panic directly. They can also be caused by runtime errors, such as out-of-bounds array accesses.
+**Panic** is a built-in function that stops the ordinary flow of control and begins panicking. When the function F calls panic, execution of F stops, any deferred functions in F are executed normally, and then F returns to its caller. To the caller, F then behaves like a call to panic. The process continues up the stack until all functions in the current goroutine have retu    rned, at which point the program crashes. Panics can be initiated by invoking panic directly. They can also be caused by runtime errors, such as out-of-bounds array accesses.
 
 **Recover** is a built-in function that regains control of a panicking goroutine. Recover is only useful inside deferred functions. During normal execution, a call to recover will return nil and have no other effect. If the current goroutine is panicking, a call to recover will capture the value given to panic and resume normal execution.
 
+Having said that, we are going to define our _exception_ object as:
+```go
+type goexcep struct {
+	e      chan int
+	excep  bool
+	errmsg string
+}
+```
+
+- The channel **e** is used to synchronize the _try_ and _catch_ method. 
+- The boolean **excep** is used to specify whether an exception occured or not.
+- The string **errmsg** is used to hold the error message corresponding to the exception.
+
+The code to wrap with our exception handling is provided as a function to the **TryAndCatch** method. If the method returns an error, it means that either a runtime exception or an exception purposely thrown has been detected, and it is your job to do something about it.
 
 
 
