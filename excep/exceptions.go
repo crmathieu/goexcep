@@ -7,13 +7,12 @@ import (
 
 type goexcep struct {
 	e      chan int
-	excep  bool
 	errmsg string
 }
 
 // NewGoexcep - create an exception object
 func NewGoexcep() *goexcep {
-	return &goexcep{e: make(chan int), excep: false, errmsg: ""}
+	return &goexcep{e: make(chan int, 1), errmsg: ""}
 }
 
 // Throw - Throws an exception
@@ -30,33 +29,29 @@ func (g *goexcep) TryAndCatch(f func()) error {
 // try - will try a function and recover from an exception if something
 // happens during its execution
 func (g *goexcep) try(f func()) {
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				// we are recovering from a panic
-				fmt.Printf("Recovering from (%v)\n", r)
-				if err, ok := r.(error); ok {
-					g.errmsg = err.Error()
-				} else {
-					g.errmsg = fmt.Sprintf("%v", r)
-				}
-				// we exit with an exception - feed the exception channel
-				g.excep = true
-				g.e <- 1
+	defer func() {
+		if r := recover(); r != nil {
+			// we are recovering from a panic
+			fmt.Printf("Recovering from (%v)\n", r)
+			if err, ok := r.(error); ok {
+				g.errmsg = err.Error()
+			} else {
+				g.errmsg = fmt.Sprintf("%v", r)
 			}
-		}()
-		f()
-		// we exit without exception - feed the exception channel
-		g.excep = false
-		g.e <- 1
+			// we exit with an exception - feed the exception channel
+			g.e <- 1
+		}
 	}()
+	f()
+	// we exit without exception - feed the exception channel
+	g.e <- 0
 }
 
 // catch - will listen to the exception channel waiting for an exception to
 // occur -or- the end of the normal execution
 func (g *goexcep) catch() error {
-	<-g.e
-	if g.excep == true {
+	excep := <-g.e
+	if excep != 0 {
 		return errors.New(g.errmsg)
 	}
 	return nil

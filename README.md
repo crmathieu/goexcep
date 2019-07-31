@@ -91,29 +91,26 @@ func (g *goexcep) TryAndCatch(f func()) error {
 }
 ```
 
-To make this work, the function _f_ in the _try_ method must be ran as a separate go routine, hence the final code of _try_:
 ```go
 func (g *goexcep) try(f func()) {
-    go func() {
-        defer func() {
-            if r := recover(); r != nil {
-                // we are recovering from a panic
-                fmt.Printf("Recovering from (%v)\n", r)
-                if err, ok := r.(error); ok {
-                    g.errmsg = err.Error()
-                } else {
-                    g.errmsg = fmt.Sprintf("%v", r)
-                }
-                // we exit with an exception - feed the exception channel
-                g.excep = true
-                g.e <- 1
+    defer func() {
+        if r := recover(); r != nil {
+            // we are recovering from a panic
+            fmt.Printf("Recovering from (%v)\n", r)
+            if err, ok := r.(error); ok {
+                g.errmsg = err.Error()
+            } else {
+                g.errmsg = fmt.Sprintf("%v", r)
             }
-        }()
-        f()
-        // we exit without exception - feed the exception channel
-        g.excep = false
-        g.e <- 1
+            // we exit with an exception - feed the exception channel
+            g.excep = true
+            g.e <- 1
+        }
     }()
+    f()
+    // we exit without exception - feed the exception channel
+    g.excep = false
+    g.e <- 1
 }
 ```
 
@@ -179,52 +176,86 @@ func nestedProblems() {
 }
 ```
 
-#### longer function
+#### index range
 ```go
-func longer() {
-    segViolation()
-
-    // then print something
-    fmt.Println("After the violation...")
+func indexRange() {
+    x := []int{1,2} 
+    // then loop forever
+    for i:=0;i<5;i++ {
+        fmt.Println(x[i])
+    }
 }
 ```
+
+#### deeper function
+```go
+func deeper() {
+    indexRange()
+    fmt.Println("end")
+}
+```
+#### function with goroutine
+If your function creates go subroutines, each subroutine will operate on its own stack and will be out of scope in the **TryAndCatch** function. To make this work, each subroutine MUST create their own exception object and call their own **TryAndCatch** function, like in the example below:
+
+```go
+func withSubroutine() {	
+	go func() {
+		var e2 = goe.NewGoexcep()
+		if err := e2.TryAndCatch(segViolation); err != nil {
+			fmt.Printf("Caught in goroutine 'segViolation' (%v)\n",err.Error())
+		}
+	}()
+	divByZero()
+}
+```
+**withSubroutine** will generate 2 exceptions: one during the execution of the _divByZero_ function and one inside the goroutine originating from the _segViolation_ function.
 
 #### let's put everything together
 ```go
 func main() {
     e := goe.NewGoexcep()
-    if err := e.TryAndCatch(divByZero); err != nil {
-        // catch code
-        fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
-    }
-    if err := e.TryAndCatch(goodboy); err != nil {
-        // catch code
-        fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
-    }
-    if err := e.TryAndCatch(longer); err != nil {
-        // catch code
-        fmt.Printf("Caught in 'longer' (%v)\n",err.Error())
-    }
-    if err := e.TryAndCatch(nestedProblems); err != nil {
-        // catch code
-        fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
-    }
+	if err := e.TryAndCatch(withSubroutine); err != nil {
+       // catch code
+        fmt.Printf("Caught in 'withSubroutine' (%v)\n",err.Error())
+ 	}
+	if err := e.TryAndCatch(divByZero); err != nil {
+		// catch code
+		fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
+	}
+	if err := e.TryAndCatch(goodboy); err != nil {
+		// catch code
+		fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
+	}
+	if err := e.TryAndCatch(deeper); err != nil {
+		// catch code
+		fmt.Printf("Caught in 'deepger' (%v)\n",err.Error())
+	}
+	if err := e.TryAndCatch(nestedProblems); err != nil {
+		// catch code
+		fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
+	}
 }
 ```
 
 #### The ebove code returns the following messages
 ```text
 Recovering from (runtime error: integer divide by zero)
-Caught in 'divByZero' (runtime error: integer divide by zero)
-It's all good...
+Caught in 'withSubroutine' (runtime error: integer divide by zero)
+Recovering from (runtime error: integer divide by zero)
 Recovering from (runtime error: invalid memory address or nil pointer dereference)
-Caught in 'longer' (runtime error: invalid memory address or nil pointer dereference)
+Caught in 'divByZero' (runtime error: integer divide by zero)
+Caught in goroutine 'segViolation' (runtime error: invalid memory address or nil pointer dereference)
+It's all good...
+1
+2
+Recovering from (runtime error: index out of range)
+Caught in 'deeper' (runtime error: index out of range)
 Recovering from (let's throw an exception)
 Caught in 'letitthrow' from inner try catch (let's throw an exception)
 Recovering from (Re-Throwning (let's throw an exception))
 Caught in 'nestedProblems' (Re-Throwning (let's throw an exception))
 ```
 
-You will notice that because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the goroutine. This in turns triggers a call the deferred block which captures _panic_ with the _recover_ function.
+Because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the goroutine. This, in turns, triggers a call to the deferred function which captures _panic_ using the _recover_ function.
 
-For that reason, we can see for example that in the **longer** function, the instruction to display the message **_After the violation..._** never gets a chance to be executed simply because when the runtime error happens in the call to **segViolation**, it bubbles up to the **longer** function body and since there is no differed block with recovery yet, it continues to bubble up. Hence any code following the origin of the error will be ignored.  
+For that reason, we can see for example that in the **deeper** function, the instruction to display the message **end** never gets a chance to be executed simply because when the runtime error happens within the **indexRange** function, it bubbles up to the **deeper** function body and since there is no differed block with recovery yet, it continues on bubbling up the call stack. Hence any code following the function call where an error originated is ignored.  

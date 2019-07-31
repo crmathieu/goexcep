@@ -38,18 +38,39 @@ func nestedProblems() {
 	}
 }
 
-// longer func
-func longer() {
-	segViolation()
-	
+// indexRange
+func indexRange() {
+	x := []int{1,2} 
 	// then loop forever
-	for i:=0;;i++ {
-		fmt.Println(i)
+	for i:=0;i<5;i++ {
+		fmt.Println(x[i])
 	}
+	fmt.Println("end")
+}
+
+// deeper 
+func deeper() {
+    indexRange()
+    fmt.Println("end")
+}
+
+// with subroutine
+func withSubroutine() {	
+	go func() {
+		var e2 = goe.NewGoexcep()
+		if err := e2.TryAndCatch(segViolation); err != nil {
+			fmt.Printf("Caught in goroutine 'segViolation' (%v)\n",err.Error())
+		}
+	}()
+	divByZero()
 }
 
 func main() {
-	e := goe.NewGoexcep()
+	e := goe.NewGoexcep() 
+	if err := e.TryAndCatch(withSubroutine); err != nil {
+       // catch code
+        fmt.Printf("Caught in 'withSubroutine' (%v)\n",err.Error())
+ 	}
 	if err := e.TryAndCatch(divByZero); err != nil {
 		// catch code
 		fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
@@ -58,9 +79,9 @@ func main() {
 		// catch code
 		fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
 	}
-	if err := e.TryAndCatch(longer); err != nil {
+	if err := e.TryAndCatch(deeper); err != nil {
 		// catch code
-		fmt.Printf("Caught in 'longer' (%v)\n",err.Error())
+		fmt.Printf("Caught in 'deeper' (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(nestedProblems); err != nil {
 		// catch code
