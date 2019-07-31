@@ -41,9 +41,11 @@ func nestedProblems() {
 // longer func
 func longer() {
 	segViolation()
-
+	
 	// then loop forever
-	for true {}
+	for i:=0;;i++ {
+		fmt.Println(i)
+	}
 }
 
 func main() {

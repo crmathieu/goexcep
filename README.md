@@ -184,8 +184,8 @@ func nestedProblems() {
 func longer() {
     segViolation()
 
-    // then loop forever
-    for true {}
+    // then print something
+    fmt.Println("After the violation...")
 }
 ```
 
@@ -209,6 +209,8 @@ func main() {
         // catch code
         fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
     }
+
+    time.Sleep(5)
 }
 ```
 
@@ -224,3 +226,7 @@ Caught in 'letitthrow' from inner try catch (let's throw an exception)
 Recovering from (Re-Throwning (let's throw an exception))
 Caught in 'nestedProblems' (Re-Throwning (let's throw an exception))
 ```
+
+You will notice that because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the goroutine. This in turns triggers a call the deferred block which captures _panic_ with the _recover_ function.
+
+For that reason, we can see for example that in the **longer** function, the instruction to display the message **_After the violation..._** never gets a chance to be executed simply because when the runtime error happens in the call to **segViolation**, it bubbles up to the **longer** function body and since there is no differed block with recovery yet, it continues to bubble up. Hence any code following the origin of the error will be ignored.  
