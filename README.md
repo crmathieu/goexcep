@@ -100,14 +100,14 @@ func (g *goexcep) try(f func()) {
                 // we are recovering from a panic
                 fmt.Println("Recovering from", r)
                 if err, ok := r.(error); ok {
-                g.errmsg = err.Error()
-            } else {
-                g.errmsg = fmt.Sprintf("%v", r)
+                    g.errmsg = err.Error()
+                } else {
+                    g.errmsg = fmt.Sprintf("%v", r)
+                }
+                // we exit with an exception - feed the exception channel
+                g.excep = true
+                g.e <- 1
             }
-            // we exit with an exception - feed the exception channel
-            g.excep = true
-            g.e <- 1
-        }
         }()
         f()
         // we exit without exception - feed the exception channel
