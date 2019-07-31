@@ -133,7 +133,7 @@ func NewGoexcep() *goexcep
 func Throw(msg string) 
 ```
 
-## Examples
+## Example
 The following illustrates the capture of different type of exceptions (runtime, code generated) as well as an example of nested exceptions
 
 
