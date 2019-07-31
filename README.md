@@ -152,7 +152,7 @@ func letitthrow() {
 }
 ```
 
-#### Nicely behaving function
+#### nicely behaving function
 ```go
 func goodboy() {
     fmt.Println("It's all good...")
@@ -167,7 +167,7 @@ func segViolation() {
 }
 ```
 
-#### Nested exception
+#### nested exception
 ```go
 func nestedProblems() {
     var e2 = goe.NewGoexcep()
@@ -179,13 +179,13 @@ func nestedProblems() {
 }
 ```
 
-#### longer func
+#### longer function
 ```go
 func longer() {
-	segViolation()
+    segViolation()
 
-	// then loop forever
-	for true {}
+    // then loop forever
+    for true {}
 }
 ```
 
