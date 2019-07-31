@@ -71,7 +71,7 @@ A private _catch_ method waits for the exception channel to be unblocked. This i
 
 ```go
 func (g *goexcep) catch() error {
-    except := <-g.e
+    excep := <-g.e
     if excep != 0 {
         return errors.New(g.errmsg)
     }
