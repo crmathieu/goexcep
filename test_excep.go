@@ -45,7 +45,6 @@ func indexRange() {
 	for i:=0;i<5;i++ {
 		fmt.Println(x[i])
 	}
-	fmt.Println("end")
 }
 
 // deeper 
