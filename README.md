@@ -180,7 +180,7 @@ func nestedProblems() {
 ```go
 func indexRange() {
     x := []int{1,2} 
-    // then loop forever
+    
     for i:=0;i<5;i++ {
         fmt.Println(x[i])
     }
@@ -195,7 +195,7 @@ func deeper() {
 }
 ```
 #### function with goroutine
-If your function creates go subroutines, each subroutine will operate on its own stack and will be out of scope in the **TryAndCatch** function. To make this work, each subroutine MUST create their own exception object and call their own **TryAndCatch** function, like in the example below:
+If your function creates go subroutines, each subroutine will operate on its own stack and will be out of scope as far as the current **TryAndCatch** function call is concerned. To make this work, each subroutine MUST create their own exception object and call their own **TryAndCatch** function, like in the example below:
 
 ```go
 func withSubroutine() {	
