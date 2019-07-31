@@ -41,7 +41,7 @@ func nestedProblems() {
 // indexRange
 func indexRange() {
 	x := []int{1,2} 
-	// then loop forever
+
 	for i:=0;i<5;i++ {
 		fmt.Println(x[i])
 	}
