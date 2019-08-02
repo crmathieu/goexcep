@@ -123,21 +123,6 @@ func (g *goexcep) try(f func()) {
 
 ## API
 
-#### Try
-```go
-func (g *goexcep) Try(f func())
-```
-
-#### Catch
-```go
-func (g *goexcep) Catch() error 
-```
-
-#### or you can Try and Catch in one call
-```go
-func (g *goexcep) TryAndCatch(f func()) error 
-```
-
 #### Create an exception object
 ```go
 func NewGoexcep() *goexcep
@@ -148,7 +133,22 @@ func NewGoexcep() *goexcep
 func Throw(msg string) 
 ```
 
-## Example
+#### Try
+```go
+func (g *goexcep) Try(f func())
+```
+
+#### Catch
+```go
+func (g *goexcep) Catch() error 
+```
+
+#### or Try and Catch in one call
+```go
+func (g *goexcep) TryAndCatch(f func()) error 
+```
+
+## Examples
 The following illustrates the capture of different type of exceptions (runtime, code generated) as well as an example of nested exceptions
 
 #### runtime error (division by 0)
