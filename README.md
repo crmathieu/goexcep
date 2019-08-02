@@ -205,6 +205,13 @@ func indexRange() {
 }
 ```
 
+#### stack overflow
+```go
+func stackOverflow() {
+	stackOverflow()
+}
+```
+
 #### deeper function
 ```go
 func deeper() {
@@ -282,3 +289,6 @@ Caught in goroutine 'segViolation' (runtime error: invalid memory address or nil
 Because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the TryAndCatch code. This, in turns, triggers a call to the deferred function which captures _panic_ using the _recover_ function.
 
 For that reason, we can see for example that in the **deeper** function, the instruction to display the message **end** never gets a chance to be executed simply because when the runtime error happens within the **indexRange** function, it bubbles up to the **deeper** function body and since there is no differed block with recovery yet, it continues on bubbling up the call stack. Hence any code following the function call where an error originated is ignored.  
+
+**Note**
+This exception mechanism will NOT work for _Stack Overflow_. This is because the **recover** function can't handle stack issues as it uses the stack to bubble up. If the stack is corrupted, this can't work and you will get a **fatal error** and a stack trace.
