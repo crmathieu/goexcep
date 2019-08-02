@@ -47,6 +47,14 @@ func (g *goexcep) try(f func()) {
 	g.e <- 0
 }
 
+func (g *goexcep) Try(f func()) {
+	g.try(f)
+}
+
+func (g *goexcep) Catch() error {
+	return g.catch()
+}
+
 // catch - will listen to the exception channel waiting for an exception to
 // occur -or- the end of the normal execution
 func (g *goexcep) catch() error {

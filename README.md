@@ -11,7 +11,7 @@ import (
 
 ## Introduction
 For those developers used to work in C++, Java, PHP, Python etc... it might be a little hard to realize that Go does not have exceptions. But there are ways where we can sort of simulate the type of exception handling known in other languages.
- 
+
 
 Go allows functions to return an error type in addition to a result via its support for multiple return values. By declaring an error return value you indicate to the caller that this method could go wrong. If a function returns a value and an error, then you can’t assume anything about the value until you’ve inspected the error. 
 
@@ -122,7 +122,18 @@ func (g *goexcep) try(f func()) {
 ```
 
 ## API
-#### Try and catch exception generated in function _f_
+
+#### Try
+```go
+func (g *goexcep) Try(f func())
+```
+
+#### Catch
+```go
+func (g *goexcep) Catch() error 
+```
+
+#### or you can Try and Catch in one call
 ```go
 func (g *goexcep) TryAndCatch(f func()) error 
 ```
@@ -221,6 +232,15 @@ func withSubroutine() {
 ```go
 func main() {
     e := goe.NewGoexcep()
+
+    // one way to do it
+    e.Try(deeper)
+    if err := e.Catch(); err != nil {
+        // catch code
+        fmt.Printf("Caught in 'deeper' (%v)\n",err.Error())
+    }
+
+    // and the other way
     if err := e.TryAndCatch(withSubroutine); err != nil {
         // catch code
         fmt.Printf("Caught in 'withSubroutine' (%v)\n",err.Error())
@@ -233,10 +253,6 @@ func main() {
         // catch code
         fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
     }
-    if err := e.TryAndCatch(deeper); err != nil {
-        // catch code
-        fmt.Printf("Caught in 'deepger' (%v)\n",err.Error())
-    }
     if err := e.TryAndCatch(nestedProblems); err != nil {
         // catch code
         fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
@@ -246,21 +262,21 @@ func main() {
 
 #### The above code returns the following messages
 ```text
-Recovering from (runtime error: integer divide by zero)
-Caught in 'withSubroutine' (runtime error: integer divide by zero)
-Recovering from (runtime error: integer divide by zero)
-Recovering from (runtime error: invalid memory address or nil pointer dereference)
-Caught in 'divByZero' (runtime error: integer divide by zero)
-Caught in goroutine 'segViolation' (runtime error: invalid memory address or nil pointer dereference)
-It's all good...
 1
 2
 Recovering from (runtime error: index out of range)
 Caught in 'deeper' (runtime error: index out of range)
+Recovering from (runtime error: integer divide by zero)
+Caught in 'withSubroutine' (runtime error: integer divide by zero)
+Recovering from (runtime error: integer divide by zero)
+Caught in 'divByZero' (runtime error: integer divide by zero)
+It's all good...
 Recovering from (let's throw an exception)
 Caught in 'letitthrow' from inner try catch (let's throw an exception)
 Recovering from (Re-Throwning (let's throw an exception))
 Caught in 'nestedProblems' (Re-Throwning (let's throw an exception))
+Recovering from (runtime error: invalid memory address or nil pointer dereference)
+Caught in goroutine 'segViolation' (runtime error: invalid memory address or nil pointer dereference)
 ```
 
 Because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the TryAndCatch code. This, in turns, triggers a call to the deferred function which captures _panic_ using the _recover_ function.

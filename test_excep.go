@@ -65,7 +65,16 @@ func withSubroutine() {
 }
 
 func main() {
-	e := goe.NewGoexcep() 
+	e := goe.NewGoexcep()
+
+	// one way to do it
+	e.Try(deeper)
+	if err := e.Catch(); err != nil {
+		// catch code
+		fmt.Printf("Caught in 'deeper' (%v)\n",err.Error())
+	}
+
+	// and the other way
 	if err := e.TryAndCatch(withSubroutine); err != nil {
        // catch code
         fmt.Printf("Caught in 'withSubroutine' (%v)\n",err.Error())
@@ -77,10 +86,6 @@ func main() {
 	if err := e.TryAndCatch(goodboy); err != nil {
 		// catch code
 		fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
-	}
-	if err := e.TryAndCatch(deeper); err != nil {
-		// catch code
-		fmt.Printf("Caught in 'deeper' (%v)\n",err.Error())
 	}
 	if err := e.TryAndCatch(nestedProblems); err != nil {
 		// catch code
