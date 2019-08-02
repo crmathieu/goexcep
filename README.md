@@ -208,7 +208,7 @@ func indexRange() {
 #### stack overflow
 ```go
 func stackOverflow() {
-	stackOverflow()
+    stackOverflow()
 }
 ```
 
