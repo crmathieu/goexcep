@@ -53,6 +53,7 @@ Having said that, we are going to define an _exception_ object as:
 ```go
 type Goexcep struct {
     e      chan int
+    code   int
     errmsg string
 }
 ```
@@ -113,7 +114,7 @@ func (g *Goexcep) TryAndCatch(f func()) bool {
 ```
 
 ```go
-func (g *Goexcep) try(f func()) {
+func (g *Goexcep) try(f func(e *Goexcep)) {
     defer func() {
         if r := recover(); r != nil {
             var t string
@@ -139,7 +140,7 @@ func (g *Goexcep) try(f func()) {
             g.e <- 1
         }
     }()
-    f()
+    f(g)
     // we exit without exception - feed the exception channel
     g.e <- 0
 }
@@ -159,7 +160,7 @@ func Throw(msg string, errcode int)
 
 #### Try
 ```go
-func (g *Goexcep) Try(f func())
+func (g *Goexcep) Try(f func(*Goexcep))
 ```
 
 #### Catch
@@ -169,7 +170,7 @@ func (g *Goexcep) Catch() error
 
 #### or Try and Catch in one call
 ```go
-func (g *Goexcep) TryAndCatch(f func()) error 
+func (g *Goexcep) TryAndCatch(f func(*Goexcep)) error 
 ```
 
 #### GetErrorCode
@@ -203,14 +204,14 @@ func letitthrow() {
 
 #### nicely behaving function
 ```go
-func goodboy() {
+func goodboy(e *Goexcep) {
     fmt.Println("It's all good...")
 }
 ```
 
 #### runtime error (memory violation)
 ```go
-func segViolation() {
+func segViolation(e *Goexcep) {
     var p *int
     *p = 1
 }
@@ -218,19 +219,18 @@ func segViolation() {
 
 #### nested exception
 ```go
-func nestedProblems() {
-    var e2 = goe.NewGoexcep()
-    if e2.TryAndCatch(letitthrow) {
+func nestedProblems(e *Goexcep) {
+    if e.TryAndCatch(letitthrow) {
         // catch code
-        fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n", e2.GetError())
-        goe.Throw(fmt.Sprintf("Re-Throwning (%v)", e2.GetError()), e2.GetErrorCode())
+        fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n", e.GetError())
+        goe.Throw(fmt.Sprintf("Re-Throwning (%v)", e.GetError()), e.GetErrorCode())
     }
 }
 ```
 
 #### index range
 ```go
-func indexRange() {
+func indexRange(e *Goexcep) {
     x := []int{1,2} 
     
     for i:=0;i<5;i++ {
@@ -241,30 +241,29 @@ func indexRange() {
 
 #### stack overflow
 ```go
-func stackOverflow() {
-    stackOverflow()
+func stackOverflow(e *Goexcep) {
+    stackOverflow(e)
 }
 ```
 
 #### deeper function
 ```go
-func deeper() {
-    indexRange()
+func deeper(e *Goexcep) {
+    indexRange(e)
     fmt.Println("end")
 }
 ```
 #### function with goroutine
-If your function creates go subroutines, each subroutine will operate on its own stack and will be out of scope as far as the current **TryAndCatch** function call is concerned. To make this work, each subroutine MUST create their own exception object and call their own **TryAndCatch** function, like in the example below:
+If your function creates go subroutines, each subroutine will operate on its own stack and will be out of scope as far as the current **TryAndCatch** function call is concerned. To make this work, each subroutine MUST **Try** or **TryAndCatch** their own code to recover from potential panic, like in the example below:
 
 ```go
-func withSubroutine() {	
+func withSubroutine(e *Goexcep) {	
     go func() {
-        var e2 = goe.NewGoexcep()
-        if e2.TryAndCatch(segViolation) {
-            fmt.Printf("Caught in goroutine 'segViolation' (%v)\n", e2.GetError())
+        if e.TryAndCatch(segViolation) {
+            fmt.Printf("Caught in goroutine 'segViolation' (%v)\n", e.GetError())
         }
     }()
-    divByZero()
+    divByZero(e)
 }
 ```
 **withSubroutine** will generate 2 exceptions: one during the execution of the _divByZero_ function and one inside the goroutine originating from the _segViolation_ function.
@@ -275,8 +274,8 @@ func main() {
     e := goe.NewGoexcep()
 
     // one way to do it
-    e.Try(func() {
-        indexRange()
+    e.Try(func(*Goexcep) {
+        indexRange(e)
         fmt.Println("end")
     })
     if e.Catch() {
