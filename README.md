@@ -74,7 +74,7 @@ A private _try_ method takes a function as a parameter. This function correspond
             }
             var err error
             tok := strings.Split(t, ":")
-            if tok[0] == "THROW" {
+            if tok[0] == THROW_STR {
                 g.code, err = strconv.Atoi(tok[1])
                 if err != nil {
                     g.code = EXCEP_UNKNOWN
@@ -125,7 +125,7 @@ func (g *goexcep) try(f func()) {
             }
             var err error
             tok := strings.Split(t, ":")
-            if tok[0] == "THROW" {
+            if tok[0] == THROW_STR {
                 g.code, err = strconv.Atoi(tok[1])
                 if err != nil {
                     g.code = EXCEP_UNKNOWN

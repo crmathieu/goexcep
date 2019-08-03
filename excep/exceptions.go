@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 const (
+	THROW_STR = "THROW"
 	EXCEP_RUNTIME = -1
 	EXCEP_UNKNOWN = -2
 	EXCEP_RETHROW = 1
@@ -24,7 +25,7 @@ func NewGoexcep() *goexcep {
 
 // Throw - Throws an exception
 func Throw(msg string, code int) {
-	panic(fmt.Sprintf("THROW:%v:%v", code, msg))
+	panic(fmt.Sprintf("%v:%v:%v", THROW_STR, code, msg))
 }
 
 // TryAndCatch - performs a try and returns a boolean
@@ -57,7 +58,7 @@ func (g *goexcep) try(f func()) {
 			}
 			var err error
 			tok := strings.Split(t, ":")
-			if tok[0] == "THROW" {
+			if tok[0] == THROW_STR {
 				g.code, err = strconv.Atoi(tok[1])
 				if err != nil {
 					g.code = EXCEP_UNKNOWN
