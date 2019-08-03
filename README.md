@@ -188,7 +188,7 @@ The following illustrates the capture of different type of exceptions (runtime, 
 
 #### runtime error (division by 0)
 ```go
-func divByZero() {
+func divByZero(e *Goexcep) {
     a, b := 1, 0
     c := a / b
     fmt.Println(c)
@@ -197,7 +197,7 @@ func divByZero() {
 
 #### exception thrown
 ```go
-func letitthrow() {
+func letitthrow(e *Goexcep) {
     goe.Throw("let's throw an exception of type CUSTOM1", goe.EXCEP_CUSTOM1)
 }
 ```
