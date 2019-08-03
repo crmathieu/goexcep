@@ -1,11 +1,11 @@
-# goexcep
+# Goexcep
 exception in Go for the nostalgic.
 
 ## Installation
-Run ```go get https://github.com/crmathieu/goexcep``` and import the package at the beginning of your code:
+Run ```go get https://github.com/crmathieu/Goexcep``` and import the package at the beginning of your code:
 ```go
 import (
-    goe "github.com/crmathieu/goexcep/excep"
+    goe "github.com/crmathieu/Goexcep/excep"
 )
 ```
 
@@ -51,7 +51,7 @@ func c() (i int) {
 
 Having said that, we are going to define an _exception_ object as:
 ```go
-type goexcep struct {
+type Goexcep struct {
     e      chan int
     errmsg string
 }
@@ -94,7 +94,7 @@ Here we first check if we are recovering from a call to **panic**. When this is 
 A private _catch_ method waits for the exception channel to be unblocked. This is accomplished when an exception occurs from the recovery of a call to panic, or when the code finishes normally.
 
 ```go
-func (g *goexcep) catch() bool {
+func (g *Goexcep) catch() bool {
     excep := <-g.e
     if excep != 0 {
         return true
@@ -106,14 +106,14 @@ _catch_ returns a boolean that is true when an exception occured.
 
 The API function **TryAndCatch** calls the _try_ and _catch_ methods and returns a boolean.
 ```go
-func (g *goexcep) TryAndCatch(f func()) bool {
+func (g *Goexcep) TryAndCatch(f func()) bool {
     g.try(f)
     return g.catch()
 }
 ```
 
 ```go
-func (g *goexcep) try(f func()) {
+func (g *Goexcep) try(f func()) {
     defer func() {
         if r := recover(); r != nil {
             var t string
@@ -149,7 +149,7 @@ func (g *goexcep) try(f func()) {
 
 #### Create an exception object
 ```go
-func NewGoexcep() *goexcep
+func NewGoexcep() *Goexcep
 ```
 
 #### Throw an exception
@@ -159,27 +159,27 @@ func Throw(msg string, errcode int)
 
 #### Try
 ```go
-func (g *goexcep) Try(f func())
+func (g *Goexcep) Try(f func())
 ```
 
 #### Catch
 ```go
-func (g *goexcep) Catch() error 
+func (g *Goexcep) Catch() error 
 ```
 
 #### or Try and Catch in one call
 ```go
-func (g *goexcep) TryAndCatch(f func()) error 
+func (g *Goexcep) TryAndCatch(f func()) error 
 ```
 
 #### GetErrorCode
 ```go
-func (g *goexcep) GetErrorCode() int 
+func (g *Goexcep) GetErrorCode() int 
 ```
 
 #### GetError
 ```go
-func (g *goexcep) GetError() string 
+func (g *Goexcep) GetError() string 
 ```
 
 ## Examples

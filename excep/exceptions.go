@@ -1,4 +1,4 @@
-package goexcep
+package Goexcep
 
 import (
 	"fmt"
@@ -12,15 +12,15 @@ const (
 	EXCEP_RETHROW = 1
 	EXCEP_CUSTOM1 = 10
 )
-type goexcep struct {
+type Goexcep struct {
 	e      chan int
 	code   int
 	errmsg string
 }
 
 // NewGoexcep - create an exception object
-func NewGoexcep() *goexcep {
-	return &goexcep{e: make(chan int, 1), code: EXCEP_RUNTIME, errmsg: ""}
+func NewGoexcep() *Goexcep {
+	return &Goexcep{e: make(chan int, 1), code: EXCEP_RUNTIME, errmsg: ""}
 }
 
 // Throw - Throws an exception
@@ -29,24 +29,24 @@ func Throw(msg string, code int) {
 }
 
 // TryAndCatch - performs a try and returns a boolean
-func (g *goexcep) TryAndCatch(f func()) bool {
+func (g *Goexcep) TryAndCatch(f func(e *Goexcep)) bool {
 	g.try(f)
 	return g.catch()
 }
 
 // GetErrorCode
-func (g *goexcep) GetErrorCode() int {
+func (g *Goexcep) GetErrorCode() int {
 	return g.code
 }
 
 // GetError
-func (g *goexcep) GetError() string {
+func (g *Goexcep) GetError() string {
 	return g.errmsg
 }
 
 // try - will try a function and recover from an exception if something
 // happens during its execution
-func (g *goexcep) try(f func()) {
+func (g *Goexcep) try(f func(e *Goexcep)) {
 	defer func() {
 		if r := recover(); r != nil {
 			var t string
@@ -72,22 +72,22 @@ func (g *goexcep) try(f func()) {
 			g.e <- 1
 		}
 	}()
-	f()
+	f(g)
 	// we exit without exception - feed the exception channel
 	g.e <- 0
 }
 
-func (g *goexcep) Try(f func()) {
+func (g *Goexcep) Try(f func(e *Goexcep)) {
 	g.try(f)
 }
 
-func (g *goexcep) Catch() bool {
+func (g *Goexcep) Catch() bool {
 	return g.catch()
 }
 
 // catch - will listen to the exception channel waiting for an exception to
 // occur -or- the end of the normal execution
-func (g *goexcep) catch() bool {
+func (g *Goexcep) catch() bool {
 	excep := <-g.e
 	if excep != 0 {
 		return true

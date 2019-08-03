@@ -2,44 +2,43 @@ package main
 
 import (
 	"fmt"
-	goe "github.com/crmathieu/goexcep/excep"
+	goe "github.com/crmathieu/Goexcep/excep"
 )
 
 // runtime error (division by 0)
-func divByZero() {
+func divByZero(e *goe.Goexcep) {
 	a, b := 1, 0
 	c := a / b
 	fmt.Println(c)
 }
 
 // exception thrown
-func letitthrow() {
+func letitthrow(e *goe.Goexcep) {
 	goe.Throw("let's throw an exception of type CUSTOM1", goe.EXCEP_CUSTOM1)
 }
 
 // nicely behaving function
-func goodboy() {
+func goodboy(e *goe.Goexcep) {
 	fmt.Println("It's all good...")
 }
 
 // segment violation
-func segViolation() {
+func segViolation(e *goe.Goexcep) {
 	var p *int
 	*p = 1
 }
 
 // nested exception
-func nestedProblems() {
-	var e2 = goe.NewGoexcep()
-	if e2.TryAndCatch(letitthrow) {
+func nestedProblems(e *goe.Goexcep) {
+	if e.TryAndCatch(letitthrow) {
 		// catch code
-		fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n", e2.GetError())
-		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", e2.GetError()), e2.GetErrorCode())
+		fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n", e.GetError())
+		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", e.GetError()), e.GetErrorCode())
 	}
 }
 
 // indexRange
-func indexRange() {
+func indexRange(e *goe.Goexcep) {
 	x := []int{1,2} 
 
 	for i:=0;i<5;i++ {
@@ -49,28 +48,31 @@ func indexRange() {
 
 
 // deeper 
-func deeper() {
-    indexRange()
+func deeper(e *goe.Goexcep) {
+    indexRange(e)
     fmt.Println("end")
 }
 
+
 // with subroutine
-func withSubroutine() {	
+func withSubroutine(e *goe.Goexcep) {	
 	go func() {
-		var e2 = goe.NewGoexcep()
-		if e2.TryAndCatch(segViolation) {
-			fmt.Printf("Caught in goroutine 'segViolation' (%v)\n", e2.GetError())
+		e.Try(func(*goe.Goexcep) {
+			segViolation(e)
+		})
+		if e.Catch() {
+			fmt.Printf("Caught in 'withSubroutine' goroutine (%v)\n", e.GetError())
 		}
 	}()
-	divByZero()
+	divByZero(e)
 }
 
 func main() {
 	e := goe.NewGoexcep()
 
 	// one way to do it
-	e.Try(func() {
-		indexRange()
+	e.Try(func(*goe.Goexcep) {
+		indexRange(e)
 		fmt.Println("end")
 	})
 	if e.Catch() {
