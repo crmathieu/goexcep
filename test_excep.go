@@ -14,7 +14,7 @@ func divByZero() {
 
 // exception thrown
 func letitthrow() {
-	goe.Throw("let's throw an exception")
+	goe.Throw("let's throw an exception of type CUSTOM1", goe.EXCEP_CUSTOM1)
 }
 
 // nicely behaving function
@@ -31,10 +31,10 @@ func segViolation() {
 // nested exception
 func nestedProblems() {
 	var e2 = goe.NewGoexcep()
-	if err := e2.TryAndCatch(letitthrow); err != nil {
+	if e2.TryAndCatch(letitthrow) {
 		// catch code
-		fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n",err.Error())
-		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", err.Error()))
+		fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n", e2.GetError())
+		goe.Throw(fmt.Sprintf("Re-Throwning (%v)", e2.GetError()), e2.GetErrorCode())
 	}
 }
 
@@ -58,8 +58,8 @@ func deeper() {
 func withSubroutine() {	
 	go func() {
 		var e2 = goe.NewGoexcep()
-		if err := e2.TryAndCatch(segViolation); err != nil {
-			fmt.Printf("Caught in goroutine 'segViolation' (%v)\n",err.Error())
+		if e2.TryAndCatch(segViolation) {
+			fmt.Printf("Caught in goroutine 'segViolation' (%v)\n", e2.GetError())
 		}
 	}()
 	divByZero()
@@ -69,27 +69,30 @@ func main() {
 	e := goe.NewGoexcep()
 
 	// one way to do it
-	e.Try(deeper)
-	if err := e.Catch(); err != nil {
+	e.Try(func() {
+		indexRange()
+		fmt.Println("end")
+	})
+	if e.Catch() {
 		// catch code
-		fmt.Printf("Caught in 'deeper' (%v)\n",err.Error())
+		fmt.Printf("Caught in 'anonymous' (%v) - Code (%v)\n", e.GetError(), e.GetErrorCode())
 	}
 
 	// and the other way
-	if err := e.TryAndCatch(withSubroutine); err != nil {
-       // catch code
-        fmt.Printf("Caught in 'withSubroutine' (%v)\n",err.Error())
+	if e.TryAndCatch(withSubroutine) {
+       	// catch code
+        fmt.Printf("Caught in 'withSubroutine' (%v)\n", e.GetError())
  	}
-	if err := e.TryAndCatch(divByZero); err != nil {
+	if e.TryAndCatch(divByZero) {
 		// catch code
-		fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
+		fmt.Printf("Caught in 'divByZero' (%v) - code (%v)\n", e.GetError(), e.GetErrorCode())
 	}
-	if err := e.TryAndCatch(goodboy); err != nil {
+	if e.TryAndCatch(goodboy) {
 		// catch code
-		fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
+		fmt.Printf("Caught in 'goodboy' (%v)\n", e.GetError())
 	}
-	if err := e.TryAndCatch(nestedProblems); err != nil {
+	if e.TryAndCatch(nestedProblems) {
 		// catch code
-		fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
+		fmt.Printf("Caught in 'nestedProblems' (%v)\n", e.GetError())
 	}
 }

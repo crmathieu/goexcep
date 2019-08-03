@@ -65,36 +65,48 @@ A private _try_ method takes a function as a parameter. This function correspond
 ```go
     defer func() {
         if r := recover(); r != nil {
+            var t string
             // we are recovering from a panic
-            fmt.Printf("Recovering from (%v)\n", r)
             if err, ok := r.(error); ok {
-                g.errmsg = err.Error()
-            } else {
-                g.errmsg = fmt.Sprintf("%v", r)
+                t = err.Error()
+            } else{
+                t = fmt.Sprintf("%v", r)
             }
+            var err error
+            tok := strings.Split(t, ":")
+            if tok[0] == "THROW" {
+                g.code, err = strconv.Atoi(tok[1])
+                if err != nil {
+                    g.code = EXCEP_UNKNOWN
+                }
+                g.errmsg = tok[2]
+            } else {
+                g.errmsg = t
+            }
+            fmt.Printf("Recovering from (%v)\n", g.errmsg)
             // we exit with an exception - feed the exception channel
             g.e <- 1
         }
     }()
 ```
-Here we first check if we are recovering from a call to **panic**. When this is the case (test is true), then we extract the error message and notify the exception channel.
+Here we first check if we are recovering from a call to **panic**. When this is the case (test is true), then we extract the error message and notify the exception channel. We also filter whether the exception originates from a **throw** and extract the error code if this is the case.
 
 A private _catch_ method waits for the exception channel to be unblocked. This is accomplished when an exception occurs from the recovery of a call to panic, or when the code finishes normally.
 
 ```go
-func (g *goexcep) catch() error {
+func (g *goexcep) catch() bool {
     excep := <-g.e
     if excep != 0 {
-        return errors.New(g.errmsg)
+        return true
     }
-    return nil
+    return false
 }
 ```
-_catch_ returns an error that is nil when there was no exception.
+_catch_ returns a boolean that is true when an exception occured.
 
-The API function **TryAndCatch** calls the _try_ and _catch_ methods and returns an error.
+The API function **TryAndCatch** calls the _try_ and _catch_ methods and returns a boolean.
 ```go
-func (g *goexcep) TryAndCatch(f func()) error {
+func (g *goexcep) TryAndCatch(f func()) bool {
     g.try(f)
     return g.catch()
 }
@@ -104,13 +116,25 @@ func (g *goexcep) TryAndCatch(f func()) error {
 func (g *goexcep) try(f func()) {
     defer func() {
         if r := recover(); r != nil {
+            var t string
             // we are recovering from a panic
-            fmt.Printf("Recovering from (%v)\n", r)
             if err, ok := r.(error); ok {
-                g.errmsg = err.Error()
-            } else {
-                g.errmsg = fmt.Sprintf("%v", r)
+                t = err.Error()
+            } else{
+                t = fmt.Sprintf("%v", r)
             }
+            var err error
+            tok := strings.Split(t, ":")
+            if tok[0] == "THROW" {
+                g.code, err = strconv.Atoi(tok[1])
+                if err != nil {
+                    g.code = EXCEP_UNKNOWN
+                }
+                g.errmsg = tok[2]
+            } else {
+                g.errmsg = t
+            }
+            fmt.Printf("Recovering from (%v)\n", g.errmsg)
             // we exit with an exception - feed the exception channel
             g.e <- 1
         }
@@ -130,7 +154,7 @@ func NewGoexcep() *goexcep
 
 #### Throw an exception
 ```go
-func Throw(msg string) 
+func Throw(msg string, errcode int) 
 ```
 
 #### Try
@@ -146,6 +170,16 @@ func (g *goexcep) Catch() error
 #### or Try and Catch in one call
 ```go
 func (g *goexcep) TryAndCatch(f func()) error 
+```
+
+#### GetErrorCode
+```go
+func (g *goexcep) GetErrorCode() int 
+```
+
+#### GetError
+```go
+func (g *goexcep) GetError() string 
 ```
 
 ## Examples
@@ -186,11 +220,11 @@ func segViolation() {
 ```go
 func nestedProblems() {
     var e2 = goe.NewGoexcep()
-    if err := e2.TryAndCatch(letitthrow); err != nil {
+    if e2.TryAndCatch(letitthrow) {
         // catch code
-        fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n",err.Error())
-        goe.Throw(fmt.Sprintf("Re-Throwning (%v)", err.Error()))
-    }	
+        fmt.Printf("Caught in 'letitthrow' from inner try catch (%v)\n", e2.GetError())
+        goe.Throw(fmt.Sprintf("Re-Throwning (%v)", e2.GetError()), e2.GetErrorCode())
+    }
 }
 ```
 
@@ -226,8 +260,8 @@ If your function creates go subroutines, each subroutine will operate on its own
 func withSubroutine() {	
     go func() {
         var e2 = goe.NewGoexcep()
-        if err := e2.TryAndCatch(segViolation); err != nil {
-            fmt.Printf("Caught in goroutine 'segViolation' (%v)\n",err.Error())
+        if e2.TryAndCatch(segViolation) {
+            fmt.Printf("Caught in goroutine 'segViolation' (%v)\n", e2.GetError())
         }
     }()
     divByZero()
@@ -241,28 +275,31 @@ func main() {
     e := goe.NewGoexcep()
 
     // one way to do it
-    e.Try(deeper)
-    if err := e.Catch(); err != nil {
+    e.Try(func() {
+        indexRange()
+        fmt.Println("end")
+    })
+    if e.Catch() {
         // catch code
-        fmt.Printf("Caught in 'deeper' (%v)\n",err.Error())
+        fmt.Printf("Caught in 'anonymous' (%v) - Code (%v)\n", e.GetError(), e.GetErrorCode())
     }
 
     // and the other way
-    if err := e.TryAndCatch(withSubroutine); err != nil {
+    if e.TryAndCatch(withSubroutine) {
         // catch code
-        fmt.Printf("Caught in 'withSubroutine' (%v)\n",err.Error())
+        fmt.Printf("Caught in 'withSubroutine' (%v)\n", e.GetError())
     }
-    if err := e.TryAndCatch(divByZero); err != nil {
+    if e.TryAndCatch(divByZero) {
         // catch code
-        fmt.Printf("Caught in 'divByZero' (%v)\n",err.Error())
+        fmt.Printf("Caught in 'divByZero' (%v) - code (%v)\n", e.GetError(), e.GetErrorCode())
     }
-    if err := e.TryAndCatch(goodboy); err != nil {
+    if e.TryAndCatch(goodboy) {
         // catch code
-        fmt.Printf("Caught in 'goodboy' (%v)\n",err.Error())
+        fmt.Printf("Caught in 'goodboy' (%v)\n", e.GetError())
     }
-    if err := e.TryAndCatch(nestedProblems); err != nil {
+    if e.TryAndCatch(nestedProblems) {
         // catch code
-        fmt.Printf("Caught in 'nestedProblems' (%v)\n",err.Error())
+        fmt.Printf("Caught in 'nestedProblems' (%v)\n", e.GetError())
     }
 }
 ```
@@ -272,18 +309,16 @@ func main() {
 1
 2
 Recovering from (runtime error: index out of range)
-Caught in 'deeper' (runtime error: index out of range)
+Caught in 'anonymous' (runtime error: index out of range) - Code (-1)
 Recovering from (runtime error: integer divide by zero)
 Caught in 'withSubroutine' (runtime error: integer divide by zero)
 Recovering from (runtime error: integer divide by zero)
-Caught in 'divByZero' (runtime error: integer divide by zero)
+Caught in 'divByZero' (runtime error: integer divide by zero) - code (-1)
 It's all good...
-Recovering from (let's throw an exception)
-Caught in 'letitthrow' from inner try catch (let's throw an exception)
-Recovering from (Re-Throwning (let's throw an exception))
-Caught in 'nestedProblems' (Re-Throwning (let's throw an exception))
-Recovering from (runtime error: invalid memory address or nil pointer dereference)
-Caught in goroutine 'segViolation' (runtime error: invalid memory address or nil pointer dereference)
+Recovering from (let's throw an exception of type CUSTOM1)
+Caught in 'letitthrow' from inner try catch (let's throw an exception of type CUSTOM1)
+Recovering from (Re-Throwning (let's throw an exception of type CUSTOM1))
+Caught in 'nestedProblems' (Re-Throwning (let's throw an exception of type CUSTOM1))
 ```
 
 Because the deferred block is defined at the _try_ goroutine block level, a panic generated within the function provided as a parameter will bubble up from its origin in the call stack until it reaches the TryAndCatch code. This, in turns, triggers a call to the deferred function which captures _panic_ using the _recover_ function.
