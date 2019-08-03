@@ -197,7 +197,7 @@ func divByZero() {
 #### exception thrown
 ```go
 func letitthrow() {
-    goe.Throw("let's throw an exception")
+    goe.Throw("let's throw an exception of type CUSTOM1", goe.EXCEP_CUSTOM1)
 }
 ```
 
