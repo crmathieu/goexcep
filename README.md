@@ -10,7 +10,7 @@ import (
 ```
 
 ## Introduction
-For those developers used to work in C++, Java, PHP, Python etc... it might be a little hard to realize that Go does not have exceptions. But there are ways where we can sort of simulate the type of exception handling known in other languages.
+For those developers used to work in C++, Java, PHP, Python etc... it might be a little hard to come to grip that Go does not have exceptions. But there are ways where we can sort of simulate the type of exception handling known in other languages.
 
 
 Go allows functions to return an error type in addition to a result via its support for multiple return values. By declaring an error return value you indicate to the caller that this method could go wrong. If a function returns a value and an error, then you can’t assume anything about the value until you’ve inspected the error. 
